@@ -21,6 +21,7 @@ class Config:
     """
 
     TELEGRAM_TOKEN: Optional[str] = os.getenv("TELEGRAM_TOKEN")
+    NYT_API_KEY: Optional[str] = os.getenv("NYT_API_KEY")
 
     @classmethod
     def validate(cls):
@@ -30,5 +31,5 @@ class Config:
         Raises:
             ValueError: Если отсутствуют обязательные переменные окружения.
         """
-        if not all([cls.TELEGRAM_TOKEN]):
+        if not all([cls.TELEGRAM_TOKEN, cls.NYT_API_KEY]):
             raise ValueError("Отсутствуют все необходимые переменные окружения")
