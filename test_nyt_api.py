@@ -6,10 +6,12 @@ def test_nyt_api():
     """Комплексное тестирование NYT Books API с проверкой всех основных функций"""
     print("\n=== Начинаем тестирование NYT Books API ===")
 
+    api = NYTBooksAPI()
+
     try:
         # 1. Тест получения жанров
         print("\n[1/3] Тестируем получение списка жанров...")
-        genres = NYTBooksAPI.get_bestseller_genres()
+        genres = api.get_bestseller_genres()
 
         assert isinstance(genres, list), "Ожидался список жанров"
         assert len(genres) > 0, "Список жанров пуст"
@@ -21,7 +23,7 @@ def test_nyt_api():
         test_genre = (
             genres[0] if "hardcover-fiction" not in genres else "hardcover-fiction"
         )
-        books = NYTBooksAPI.get_bestseller_list(test_genre)
+        books = api.get_bestseller_list(test_genre)
 
         assert isinstance(books, list), "Ожидался список книг"
         assert len(books) > 0, "Список книг пуст"
@@ -36,7 +38,7 @@ def test_nyt_api():
         # 3. Тест поиска рецензий
         print("\n[3/3] Тестируем поиск рецензий...")
         test_title = "gone girl"
-        reviews = NYTBooksAPI.search_reviews(test_title)
+        reviews = api.search_reviews(test_title)
 
         assert isinstance(reviews, dict), "Ожидался словарь с результатами"
         print(f"  Успешно! Получены данные рецензий для '{test_title}'")
