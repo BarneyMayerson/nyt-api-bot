@@ -1,6 +1,8 @@
 from telebot import TeleBot
 from telebot.types import Message
 
+from handlers.common.welcome import get_welcome_message
+
 
 def bot_start(bot: TeleBot, message: Message) -> None:
     """
@@ -22,4 +24,5 @@ def bot_start(bot: TeleBot, message: Message) -> None:
         Использует message.from_user.full_name для получения полного имени,
         которое может содержать как имя, так и фамилию пользователя.
     """
-    bot.reply_to(message, f"Привет, {message.from_user.full_name}!")
+    text, keyboard = get_welcome_message()
+    bot.send_message(chat_id=message.chat.id, text=text, reply_markup=keyboard)
