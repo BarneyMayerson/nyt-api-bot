@@ -1,11 +1,11 @@
 from telebot.types import ReplyKeyboardMarkup
 
-from utils.keyboards import main_menu_kb
+from core.keyboards.main_menu import main_menu_kb
 
 
-def get_welcome_message() -> tuple[str, ReplyKeyboardMarkup]:
+def welcome_message() -> tuple[str, ReplyKeyboardMarkup]:
     """
-    Возвращает:
+    Returns:
         tuple: (текст_приветствия, клавиатура)
     """
     text = (
