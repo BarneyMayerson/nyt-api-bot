@@ -20,7 +20,7 @@ def show_genres_page(
         page: Номер страницы (начинается с 0)
         message_id: ID сообщения
     """
-    text, keyboard = genres_menu_message(genres=genres, page=page)
+    text, keyboard = genres_menu_message(genres=genres, page=page, per_page=8)
 
     if page == 0:
         # Для первой страницы - новое сообщение

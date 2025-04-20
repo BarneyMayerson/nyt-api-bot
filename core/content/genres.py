@@ -8,4 +8,4 @@ def genres_menu_message(
 ) -> tuple[str, InlineKeyboardMarkup]:
     text = f"Выберите жанр (стр. {page+1}/{len(genres) // per_page + 1}):"
 
-    return text, genre_menu_kb(genres=genres, page=page)
+    return text, genre_menu_kb(genres=genres, page=page, per_page=per_page)
