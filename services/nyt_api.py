@@ -1,4 +1,6 @@
 from typing import List, Dict
+from functools import cache
+import time
 
 import requests
 
@@ -22,6 +24,23 @@ class NYTBooksAPI:
         self.genres_endpoint = "/lists/names.json"
         self.genre_endpoint = "/lists/current/{genre}.json"
         self.review_endpoint = "/reviews.json"
+        self._last_cache_reset = time.time()
+
+    @cache
+    def _get_genres_cached(self) -> List[str]:
+        """
+        Получает и кеширует все доступные категории (жанры) бестселлеров из API NYT.
+
+        Returns:
+            List[str]: Алфавитный список названий категорий
+                     (например, ['hardcover-fiction', 'travel'])
+
+        Raises:
+            NYTAPIError: При ошибках API с деталями из ответа
+        """
+        response = self._api_request(method_endswith=self.genres_endpoint)
+
+        return [genre["list_name"] for genre in response["results"]]
 
     def _api_request(self, method_endswith: str, **kwargs) -> Dict:
         """
@@ -55,20 +74,24 @@ class NYTBooksAPI:
         except requests.exceptions.Timeout:
             raise NYTAPIError("Превышено время ожидания ответа от NYT API") from None
 
-    def get_bestseller_genres(self) -> List[str]:
+    def get_bestseller_genres(self, force_refresh: bool = False) -> List[str]:
         """
-        Получает все доступные категории (жанры) бестселлеров из API NYT.
+        Получает жанры с кэшированием на 12 часов
+
+        Args:
+            force_refresh: Принудительно обновить кэш
 
         Returns:
-            List[str]: Алфавитный список названий категорий
-                     (например, ['hardcover-fiction', 'travel'])
-
-        Raises:
-            NYTAPIError: При ошибках API с деталями из ответа
+            Список жанров
         """
-        response = self._api_request(method_endswith=self.genres_endpoint)
+        # Сбрасываем кэш если прошло 12 часов или принудительное обновление
+        if force_refresh or (
+            time.time() - self._last_cache_reset > 43200
+        ):  # 12 часов = 43200 секунд
+            self._get_genres_cached.cache_clear()
+            self._last_cache_reset = time.time()
 
-        return [genre["list_name"] for genre in response["results"]]
+        return self._get_genres_cached()
 
     def get_bestseller_list(self, genre: str) -> List[Dict]:
         """
