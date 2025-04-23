@@ -1,14 +1,14 @@
 from typing import List, Dict
 from functools import cache
 import time
-
 import requests
-
 from config.config import Config
 
 
 class NYTAPIError(Exception):
-    """Кастомное исключение для ошибок API NYT"""
+    """
+    Кастомное исключение для ошибок API NYT.
+    """
 
     pass
 
@@ -32,11 +32,10 @@ class NYTBooksAPI:
         Получает и кеширует все доступные категории (жанры) бестселлеров из API NYT.
 
         Returns:
-            List[str]: Алфавитный список названий категорий
-                     (например, ['hardcover-fiction', 'travel'])
+            List: алфавитный список названий категорий (например, ['hardcover-fiction', 'travel']).
 
         Raises:
-            NYTAPIError: При ошибках API с деталями из ответа
+            NYTAPIError: при ошибках API с деталями из ответа.
         """
         response = self._api_request(method_endswith=self.genres_endpoint)
 
@@ -47,14 +46,14 @@ class NYTBooksAPI:
         Базовый метод для выполнения запросов к NYT API.
 
         Args:
-            method_endswith (str): Конечная часть URL (например, "/lists/names.json")
-            **kwargs: Дополнительные параметры запроса
+            method_endswith (str): конечная часть URL (например, "/lists/names.json").
+            **kwargs: дополнительные параметры запроса.
 
         Returns:
-            Dict: Ответ API в формате JSON
+            Dict: ответ API в формате JSON.
 
         Raises:
-            NYTAPIError: При ошибках API с деталями из ответа
+            NYTAPIError: при ошибках API с деталями из ответа.
         """
         url = f"{self.base_url}{method_endswith}"
         params = {"api-key": Config.NYT_API_KEY}
@@ -76,13 +75,13 @@ class NYTBooksAPI:
 
     def get_bestseller_genres(self, force_refresh: bool = False) -> List[str]:
         """
-        Получает жанры с кэшированием на 12 часов
+        Получает жанры с кэшированием на 12 часов.
 
         Args:
-            force_refresh: Принудительно обновить кэш
+            force_refresh (bool): принудительно обновить кэш.
 
         Returns:
-            Список жанров
+            List: список жанров.
         """
         # Сбрасываем кэш если прошло 12 часов или принудительное обновление
         if force_refresh or (
@@ -98,20 +97,19 @@ class NYTBooksAPI:
         Получает текущий список бестселлеров для указанной категории.
 
         Args:
-            genre (str): Название категории из get_bestseller_genres()
-                       (например, 'hardcover-fiction')
+            genre (str): название категории из get_bestseller_genres() например, 'hardcover-fiction'.
 
         Returns:
-            List[Dict]: Список книг, где каждая книга представлена словарём с ключами:
+            List: список книг, где каждая книга представлена словарём с ключами:
                 - title (str): Название книги
                 - author (str): Автор
                 - publisher (str): Издательство
                 - description (str): Описание
                 - amazon_product_url (str): Ссылка на Amazon
-                - и другие поля
+                - и другие поля.
 
         Raises:
-            NYTAPIError: При ошибках API с деталями из ответа
+            NYTAPIError: при ошибках API с деталями из ответа.
         """
         genre_endpoint = self.genre_endpoint.format(genre=genre)  # Подставили жанр
         response = self._api_request(method_endswith=genre_endpoint)  # Получили ответ
@@ -123,10 +121,10 @@ class NYTBooksAPI:
         Ищет рецензии на книгу по её названию.
 
         Args:
-            title (str): Название книги для поиска
+            title (str): название книги для поиска.
 
         Returns:
-            Dict: Структура данных с рецензиями, содержащая ключи:
+            Dict: структура данных с рецензиями, содержащая ключи:
                 - status (str): Статус запроса
                 - copyright (str): Информация об авторских правах
                 - num_results (int): Количество найденных рецензий
@@ -135,13 +133,13 @@ class NYTBooksAPI:
                     - publication_dt (str): Дата публикации
                     - summary (str): Текст рецензии
                     - url (str): Ссылка на полную рецензию
-                    - и другие поля
+                    - и другие поля.
 
         Raises:
-            NYTAPIError: При ошибках API с деталями из ответа
+            NYTAPIError: при ошибках API с деталями из ответа.
 
         Note:
-            Может возвращать пустые результаты даже для существующих книг
+            Может возвращать пустые результаты даже для существующих книг.
         """
         return self._api_request(
             method_endswith=self.review_endpoint, params={"title": title}

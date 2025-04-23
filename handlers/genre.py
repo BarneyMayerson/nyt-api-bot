@@ -8,6 +8,9 @@ api = NYTBooksAPI()
 def setup_genre_handler(bot: TeleBot):
     @bot.callback_query_handler(func=lambda call: call.data.startswith("genre:"))
     def handle_genre_selection(call):
+        """
+        Обрабатывает кнопку с жанром.
+        """
         genre = call.data.split(":")[1]
         books = NYTBooksAPI().get_bestseller_list(genre)
 

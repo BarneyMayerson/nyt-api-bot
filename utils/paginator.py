@@ -26,13 +26,13 @@ class Paginator:
 
     def _make_simple_pagination_keyboard(self, page: int = 0) -> InlineKeyboardMarkup:
         """
-        Создает клавиатуру с простой пагинацией
+        Создает клавиатуру с простой пагинацией.
 
         Args:
-            page (int): Номер страницы
+            page (int): номер страницы.
 
         Returns:
-            InlineKeyboardMarkup: Готовую клавиатуру
+            InlineKeyboardMarkup: готовую клавиатуру.
         """
         kb = InlineKeyboardMarkup(row_width=2)
         _, total_pages = self.get_page(page)
@@ -57,10 +57,10 @@ class Paginator:
 
     def get_page(self, page: int = 0) -> Tuple[List[any], int]:
         """
-        Получает элементы для страницы
+        Получает элементы для страницы.
 
         Args:
-            page (int): Номер страницы.
+            page (int): номер страницы.
 
         Returns:
             Tuple: (элементы_страницы, всего_страниц).
@@ -75,10 +75,10 @@ class Paginator:
         Создает полную клавиатуру с элементами и пагинацией.
 
         Args:
-            page (int): Номер страницы.
+            page (int): номер страницы.
 
         Returns:
-            InlineKeyboardMarkup: Готовую клавиатуру.
+            InlineKeyboardMarkup: готовую клавиатуру.
         """
         kb = InlineKeyboardMarkup(row_width=2)
         page_items, _ = self.get_page(page=page)

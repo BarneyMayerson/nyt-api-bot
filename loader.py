@@ -1,6 +1,5 @@
 from telebot import TeleBot
 from telebot.types import BotCommand
-
 from handlers.commands.help import bot_help
 from handlers.commands.start import bot_start
 from handlers.commands.hello_world import bot_hello_world
@@ -20,10 +19,10 @@ def set_default_commands(bot) -> None:
     Устанавливает стандартные команды меню бота.
 
     Args:
-        bot: Экземпляр телеграм-бота
+        bot (TeleBot): экземпляр телеграм-бота.
 
     Note:
-        Команды берутся из DEFAULT_COMMANDS в формате (command, description)
+        Команды берутся из DEFAULT_COMMANDS в формате (command, description).
     """
     bot.set_my_commands(
         [BotCommand(command=cmd, description=desc) for cmd, desc in DEFAULT_COMMANDS]
@@ -35,12 +34,12 @@ def setup_handlers(bot: TeleBot) -> None:
     Регистрирует обработчики команд бота.
 
     Args:
-        bot: Экземпляр телеграм-бота
+        bot (TeleBot): экземпляр телеграм-бота.
 
     Includes:
-        - /help: Показывает список команд
-        - /start: Приветственное сообщение
-        - /hello_world: Тестовая команда (с алиасом /hello-world)
+        - /help: показывает список команд.
+        - /start: приветственное сообщение.
+        - /hello_world: тестовая команда (с алиасом /hello-world).
     """
     bot.message_handler(commands=["help"])(
         lambda message: bot_help(
@@ -61,7 +60,7 @@ def create_bot() -> TeleBot:
     Создает и настраивает экземпляр телеграм-бота.
 
     Returns:
-        TeleBot: Настроенный экземпляр бота
+        TeleBot: настроенный экземпляр бота.
 
     Steps:
         1. Валидирует конфигурацию

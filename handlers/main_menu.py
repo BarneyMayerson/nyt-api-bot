@@ -1,5 +1,4 @@
 from typing import Optional
-
 from telebot import TeleBot
 from core.content.genres import genres_menu_message
 from services.nyt_api import NYTBooksAPI
@@ -12,13 +11,13 @@ def show_genres_page(
     bot: TeleBot, chat_id: int, page: int = 0, message_id: Optional[int] = None
 ):
     """
-    Показывает страницу с жанрами (общая функция для обработчиков)
+    Показывает страницу с жанрами.
 
     Args:
-        bot: Экземпляр бота
-        chat_id: ID чата
-        page: Номер страницы (начинается с 0)
-        message_id: ID сообщения
+        bot (TeleBot): экземпляр бота.
+        chat_id (int): ID чата.
+        page (int): номер страницы (начинается с 0).
+        message_id (int): ID сообщения.
     """
     text, keyboard = genres_menu_message(genres=genres, page=page, per_page=8)
 
@@ -38,11 +37,16 @@ def show_genres_page(
 def setup_main_menu_handlers(bot: TeleBot):
     @bot.message_handler(func=lambda msg: msg.text == "📊 Список бестселлеров")
     def handle_bestsellers(message):
+        """
+        Обрабатывает кнопку со списком бестселлеров.
+        """
         show_genres_page(bot=bot, chat_id=message.chat.id)
 
     @bot.callback_query_handler(func=lambda call: call.data.startswith("genres_page:"))
     def handle_genres_pagination(call):
-        """Обрабатывает переключение страниц с жанрами"""
+        """
+        Обрабатывает кнопки переключение страниц пагинации с жанрами.
+        """
         try:
             # Извлекаем номер страницы из callback_data
             page = int(call.data.split(":")[1])
