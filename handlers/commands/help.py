@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 from telebot import TeleBot
 from telebot.types import Message
 
@@ -6,7 +6,7 @@ from telebot.types import Message
 def bot_help(
     bot: TeleBot,
     message: Message,
-    commands: tuple[tuple[str, str], ...],
+    commands: Tuple[Tuple[str, str], ...],
     additional_text: Optional[str] = None,
 ) -> None:
     """
@@ -14,12 +14,11 @@ def bot_help(
     Может включать дополнительный пояснительный текст перед списком команд.
 
     Args:
-        bot: Экземпляр работающего Telegram бота
-        message: Объект входящего сообщения, на которое нужно ответить
-        commands: Кортеж кортежей, содержащий пары (имя_команды, описание)
-                 Пример: (("start", "Запуск бота"), ("help", "Помощь"))
-        additional_text: Дополнительный текст, который будет добавлен перед списком команд.
-                        Если None, используется только список команд.
+        bot (TeleBot: экземпляр работающего Telegram бота.
+        message (Message): объект входящего сообщения, на которое нужно ответить
+        commands (Tuple): кортеж кортежей, содержащий пары (имя_команды, описание)
+                 Пример: (("start", "Запуск бота"), ("help", "Помощь")).
+        additional_text (str): дополнительный текст, который будет добавлен перед списком команд.
 
     Returns:
         None: Функция не возвращает значение, только отправляет сообщение

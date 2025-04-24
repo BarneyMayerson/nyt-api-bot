@@ -5,10 +5,10 @@ def main_menu_kb() -> ReplyKeyboardMarkup:
     """
     Создает главное меню бота с кнопками:
     - Список бестселлеров
-    - Поиск рецензий
+    - Поиск рецензий.
 
     Returns:
-        ReplyKeyboardMarkup: Клавиатура с вертикальным расположением кнопок
+        ReplyKeyboardMarkup: клавиатура с вертикальным расположением кнопок.
     """
     keyboard = ReplyKeyboardMarkup(
         row_width=1,  # Количество кнопок в строке

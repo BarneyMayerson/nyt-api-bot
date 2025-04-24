@@ -1,12 +1,14 @@
+from typing import Tuple
 from telebot.types import ReplyKeyboardMarkup
-
 from core.keyboards.main_menu import main_menu_kb
 
 
-def welcome_message() -> tuple[str, ReplyKeyboardMarkup]:
+def welcome_message() -> Tuple[str, ReplyKeyboardMarkup]:
     """
+    Формирует приветствие бот и главную клавиатуру.
+
     Returns:
-        tuple: (текст_приветствия, клавиатура)
+        tuple: (текст_приветствия, клавиатура).
     """
     text = (
         "📚 Добро пожаловать в NYT Books Bot!\n"

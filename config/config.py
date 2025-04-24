@@ -5,7 +5,9 @@ from dotenv import find_dotenv, load_dotenv
 
 
 def _load_env() -> None:
-    """Загружает переменные окружения из .env файла."""
+    """
+    Загружает переменные окружения из .env файла.
+    """
     if not find_dotenv():
         exit("Не найден файл переменных окружения")
     load_dotenv()
