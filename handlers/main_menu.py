@@ -47,11 +47,13 @@ def show_reviews_page(
         page (int): номер страницы (начинается с 0).
         message_id (int): ID сообщения.
     """
-    reviews = api.search_reviews("gone girl")["results"]
+    reviews = api.search_reviews("gone girl")
 
-    print(reviews)
+    if not reviews.get("results"):
+        bot.send_message(chat_id, "😕 Рецензии не найдены. Попробуйте другое название.")
+        return
 
-    text, keyboard = reviews_menu_message(reviews=reviews, page=page)
+    text, keyboard = reviews_menu_message(reviews=reviews["results"], page=page)
 
     if page == 0:
         # Для первой страницы - новое сообщение
@@ -65,6 +67,7 @@ def show_reviews_page(
             message_id=message_id,  # Для callback-обработчика
             text=text,
             reply_markup=keyboard,
+            parse_mode="HTML",
         )
 
 
@@ -108,3 +111,27 @@ def setup_main_menu_handlers(bot: TeleBot):
         )
 
         show_reviews_page(bot=bot, chat_id=message.chat.id)
+
+    @bot.callback_query_handler(
+        func=lambda call: call.data.startswith(("review_prev:", "review_next:"))
+    )
+    def handle_reviews_pagination(call):
+        """
+        Обрабатывает кнопки переключение страниц с рецензиями.
+        """
+        try:
+            direction, page = call.data.split(":")
+            print(call.data)
+            page = int(page)
+
+            show_reviews_page(
+                bot=bot,
+                chat_id=call.message.chat.id,
+                page=page,
+                message_id=call.message.message_id,
+            )
+
+        except Exception:
+            bot.answer_callback_query(
+                call.id, "❌ Не удалось загрузить страницу", show_alert=True
+            )

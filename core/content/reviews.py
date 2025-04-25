@@ -17,6 +17,8 @@ def reviews_menu_message(
     """
     review = reviews[page]
 
+    print(f"Page in reviews_menu_message = {page}")
+
     text = (
         f"📚 <b>{review.get('book_title', 'Без названия')}</b> <i>by {review.get('book_author')}</i>\n\n"
         f"📅 {review.get('publication_dt', 'Дата не указана')}\n"
@@ -26,5 +28,22 @@ def reviews_menu_message(
     )
 
     keyboard = InlineKeyboardMarkup(row_width=3)
+    buttons = []
+
+    if page > 0:
+        buttons.append(
+            InlineKeyboardButton("⬅️ Назад", callback_data=f"review_prev:{page - 1}")
+        )
+
+    buttons.append(
+        InlineKeyboardButton(f"{page+1}/{len(reviews)}", callback_data="dummy")
+    )
+
+    if page < len(reviews) - 1:
+        buttons.append(
+            InlineKeyboardButton("Вперед ➡️", callback_data=f"review_next:{page + 1}")
+        )
+
+    keyboard.add(*buttons)
 
     return text, keyboard
