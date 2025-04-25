@@ -1,6 +1,7 @@
 from typing import Optional
 from telebot import TeleBot
 from core.content.genres import genres_menu_message
+from core.content.reviews import reviews_menu_message
 from services.nyt_api import NYTBooksAPI
 
 api = NYTBooksAPI()
@@ -24,6 +25,39 @@ def show_genres_page(
     if page == 0:
         # Для первой страницы - новое сообщение
         bot.send_message(chat_id=chat_id, text=text, reply_markup=keyboard)
+    else:
+        # Для последующих - редактируем существующее
+        bot.edit_message_text(
+            chat_id=chat_id,
+            message_id=message_id,  # Для callback-обработчика
+            text=text,
+            reply_markup=keyboard,
+        )
+
+
+def show_reviews_page(
+    bot: TeleBot, chat_id: int, page: int = 0, message_id: Optional[int] = None
+):
+    """
+    Показывает страницу с жанрами.
+
+    Args:
+        bot (TeleBot): экземпляр бота.
+        chat_id (int): ID чата.
+        page (int): номер страницы (начинается с 0).
+        message_id (int): ID сообщения.
+    """
+    reviews = api.search_reviews("gone girl")["results"]
+
+    print(reviews)
+
+    text, keyboard = reviews_menu_message(reviews=reviews, page=page)
+
+    if page == 0:
+        # Для первой страницы - новое сообщение
+        bot.send_message(
+            chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode="HTML"
+        )
     else:
         # Для последующих - редактируем существующее
         bot.edit_message_text(
@@ -65,4 +99,12 @@ def setup_main_menu_handlers(bot: TeleBot):
 
     @bot.message_handler(func=lambda msg: msg.text == "🔍 Поиск рецензий")
     def handle_reviews(message):
-        bot.send_message(message.chat.id, "Введите название книги для поиска рецензий:")
+        """
+        Обрабатывает кнопку поиска рецензий.
+        """
+        bot.send_message(
+            chat_id=message.chat.id,
+            text="📖 Введите название книги на английском для поиска:\n       (пример: 'Gone Girl')",
+        )
+
+        show_reviews_page(bot=bot, chat_id=message.chat.id)
