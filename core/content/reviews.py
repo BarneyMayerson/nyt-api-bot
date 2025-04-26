@@ -17,7 +17,8 @@ def reviews_menu_message(
     """
     review = reviews[page]
 
-    print(f"Page in reviews_menu_message = {page}")
+    # print(f"Page in reviews_menu_message = {page}")
+    # print(f"Review = {review}")
 
     text = (
         f"📚 <b>{review.get('book_title', 'Без названия')}</b> <i>by {review.get('book_author')}</i>\n\n"
