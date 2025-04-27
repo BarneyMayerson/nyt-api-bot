@@ -1,13 +1,18 @@
 from typing import Optional
 from telebot import TeleBot
+from telebot.types import Message, ReplyKeyboardRemove
+
 from core.content.genres import genres_menu_message
 from core.content.reviews import reviews_menu_message
+from core.keyboards.main_menu import main_menu_kb
 from services.cache import ReviewCache
 from services.nyt_api import NYTBooksAPI
 
 api = NYTBooksAPI()
 genres = api.get_bestseller_genres()
 review_cache = ReviewCache()
+# глобальный словарь для временного хранения запросов
+user_search_queries = {}
 
 
 def show_genres_page(
@@ -63,20 +68,17 @@ def show_reviews_page(
         if force_api
         else review_cache.get_reviews(chat_id=chat_id, book_title=book_title)
     )
-    print(review_cache.get(chat_id=chat_id))
-    print(f"cached_data = {cached_reviews}")
 
     if cached_reviews:
-        print("Using cached data")
         reviews = cached_reviews
     else:
-        print("Fetching from API")
         api_response = api.search_reviews(title=book_title)
 
         if not api_response.get("results"):
             bot.send_message(
                 chat_id=chat_id,
                 text="😕 Рецензии не найдены. Попробуйте другое название.",
+                reply_markup=main_menu_kb(),
             )
 
             return
@@ -91,6 +93,11 @@ def show_reviews_page(
         bot.send_message(
             chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode="HTML"
         )
+        bot.send_message(
+            chat_id=chat_id,
+            text="⬇️ Выберите действие ⬇️",
+            reply_markup=main_menu_kb(),
+        )
     else:
         # Для последующих - редактируем существующее
         bot.edit_message_text(
@@ -103,6 +110,17 @@ def show_reviews_page(
 
 
 def setup_main_menu_handlers(bot: TeleBot):
+    # Список разрешенных текстов
+    allowed_texts = ["📊 Список бестселлеров", "🔍 Поиск рецензий"]
+
+    @bot.message_handler(func=lambda msg: msg.text and msg.text not in allowed_texts)
+    def preserve_keyboard(message: Message):
+        bot.send_message(
+            chat_id=message.chat.id,
+            text="⬇️ Пожалуйста, используйте меню ⬇️",
+            reply_markup=main_menu_kb(),
+        )
+
     @bot.message_handler(func=lambda msg: msg.text == "📊 Список бестселлеров")
     def handle_bestsellers(message):
         """
@@ -132,20 +150,53 @@ def setup_main_menu_handlers(bot: TeleBot):
             )
 
     @bot.message_handler(func=lambda msg: msg.text == "🔍 Поиск рецензий")
-    def handle_reviews(message):
+    def handle_reviews(message: Message):
         """
         Обрабатывает кнопку поиска рецензий.
         """
         bot.send_message(
             chat_id=message.chat.id,
-            text="📖 Введите название книги на английском для поиска:\n       (пример: 'Gone Girl')",
+            text="📖 Введите название книги на английском для поиска\n       или /cancel для отмены. (Пример: 'Gone Girl').",
+            reply_markup=ReplyKeyboardRemove(),
         )
 
+        bot.register_next_step_handler(message=message, callback=process_book_title)
+
+    def process_book_title(message: Message):
+        if message.text == "/cancel":
+            bot.send_message(
+                chat_id=message.chat.id,
+                text="❌ Поиск отменён",
+                reply_markup=main_menu_kb(),
+            )
+
+            return
+
+        book_title = message.text.strip()
+
+        if not book_title:
+            bot.send_message(
+                chat_id=message.chat.id,
+                text="❌ Название не может быть пустым",
+                reply_markup=main_menu_kb(),
+            )
+
+            return
+
+        if len(book_title) < 2:
+            bot.send_message(
+                chat_id=message.chat.id,
+                text="❌ Слишком короткое название",
+                reply_markup=main_menu_kb(),
+            )
+
+            return
+
+        user_search_queries[message.chat.id] = book_title
         show_reviews_page(
             bot=bot,
             chat_id=message.chat.id,
-            # book_title="1Q84",
-            book_title="Gone Girl",
+            book_title=book_title,
             force_api=True,
         )
 
@@ -171,7 +222,7 @@ def setup_main_menu_handlers(bot: TeleBot):
             show_reviews_page(
                 bot=bot,
                 chat_id=call.message.chat.id,
-                book_title=cached_data["book_title"],
+                book_title=user_search_queries.get(call.message.chat.id),
                 page=page,
                 message_id=call.message.message_id,
             )
