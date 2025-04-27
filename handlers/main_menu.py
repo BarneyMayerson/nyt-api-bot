@@ -2,10 +2,12 @@ from typing import Optional
 from telebot import TeleBot
 from core.content.genres import genres_menu_message
 from core.content.reviews import reviews_menu_message
+from services.cache import ReviewCache
 from services.nyt_api import NYTBooksAPI
 
 api = NYTBooksAPI()
 genres = api.get_bestseller_genres()
+review_cache = ReviewCache()
 
 
 def show_genres_page(
@@ -38,9 +40,10 @@ def show_genres_page(
 def show_reviews_page(
     bot: TeleBot,
     chat_id: int,
-    book_title: str = "Title",
+    book_title: str,
     page: int = 0,
     message_id: Optional[int] = None,
+    force_api: bool = False,
 ):
     """
     Показывает страницу с жанрами.
@@ -51,97 +54,37 @@ def show_reviews_page(
         book_title (str):  название книги.
         page (int): номер страницы (начинается с 0).
         message_id (int): ID сообщения.
+        force_api (bool): флаг принудительного запроса к API.
     """
-    # reviews = api.search_reviews(title=book_title)
-    reviews = {
-        "status": "OK",
-        "copyright": "Copyright (c) 2025 The New York Times Company.  All Rights Reserved.",
-        "num_results": 3,
-        "results": [
-            {
-                "url": "http://www.nytimes.com/2012/05/30/books/gone-girl-by-gillian-flynn.html",
-                "publication_dt": "2012-05-30",
-                "byline": "JANET MASLIN",
-                "book_title": "Gone Girl",
-                "book_author": "Gillian Flynn",
-                "summary": "",
-                "uuid": "00000000-0000-0000-0000-000000000000",
-                "uri": "nyt://book/00000000-0000-0000-0000-000000000000",
-                "isbn13": [
-                    "9780297859383",
-                    "9780297859390",
-                    "9780297859406",
-                    "9780307588364",
-                    "9780307588371",
-                    "9780307588388",
-                    "9780385366755",
-                    "9780553398380",
-                    "9780553418354",
-                    "9780553418361",
-                    "9780606270175",
-                    "9781410450951",
-                    "9781594136054",
-                ],
-            },
-            {
-                "url": "http://www.nytimes.com/2012/06/17/books/review/gillian-flynns-gone-girl-and-more.html",
-                "publication_dt": "2012-06-17",
-                "byline": "MARILYN STASIO",
-                "book_title": "Gone Girl",
-                "book_author": "Gillian Flynn",
-                "summary": "In Gillian Flynn’s “Gone Girl,” a young woman disappears on her fifth wedding anniversary — and her husband is suspected of murder.",
-                "uuid": "00000000-0000-0000-0000-000000000000",
-                "uri": "nyt://book/00000000-0000-0000-0000-000000000000",
-                "isbn13": [
-                    "9780297859383",
-                    "9780297859390",
-                    "9780297859406",
-                    "9780307588364",
-                    "9780307588371",
-                    "9780307588388",
-                    "9780385366755",
-                    "9780553398380",
-                    "9780553418354",
-                    "9780553418361",
-                    "9780606270175",
-                    "9781410450951",
-                    "9781594136054",
-                ],
-            },
-            {
-                "url": "http://www.nytimes.com/2012/05/30/books/gone-girl-by-gillian-flynn.html",
-                "publication_dt": "2012-05-30",
-                "byline": "JANET MASLIN",
-                "book_title": "Gone Girl",
-                "book_author": "Gillian Flynn",
-                "summary": "“Gone Girl,” by Gillian Flynn, is a two-sided contest in which Nick and Amy Dunne tell conflicting stories.",
-                "uuid": "00000000-0000-0000-0000-000000000000",
-                "uri": "nyt://book/00000000-0000-0000-0000-000000000000",
-                "isbn13": [
-                    "9780297859383",
-                    "9780297859390",
-                    "9780297859406",
-                    "9780307588364",
-                    "9780307588371",
-                    "9780307588388",
-                    "9780385366755",
-                    "9780553398380",
-                    "9780553418354",
-                    "9780553418361",
-                    "9780606270175",
-                    "9781410450951",
-                    "9781594136054",
-                ],
-            },
-        ],
-    }
 
-    if not reviews.get("results"):
-        bot.send_message(chat_id, "😕 Рецензии не найдены. Попробуйте другое название.")
+    # Пытаемся получить данные из кэша (если не force_api)
+    cached_reviews = (
+        None
+        if force_api
+        else review_cache.get_reviews(chat_id=chat_id, book_title=book_title)
+    )
+    print(review_cache.get(chat_id=chat_id))
+    print(f"cached_data = {cached_reviews}")
 
-        return
+    if cached_reviews:
+        print("Using cached data")
+        reviews = cached_reviews
+    else:
+        print("Fetching from API")
+        api_response = api.search_reviews(title=book_title)
 
-    text, keyboard = reviews_menu_message(reviews=reviews["results"], page=page)
+        if not api_response.get("results"):
+            bot.send_message(
+                chat_id=chat_id,
+                text="😕 Рецензии не найдены. Попробуйте другое название.",
+            )
+
+            return
+
+        reviews = api_response["results"]
+        review_cache.set(chat_id=chat_id, book_title=book_title, reviews=reviews)
+
+    text, keyboard = reviews_menu_message(reviews=reviews, page=page)
 
     if page == 0:
         # Для первой страницы - новое сообщение
@@ -198,7 +141,13 @@ def setup_main_menu_handlers(bot: TeleBot):
             text="📖 Введите название книги на английском для поиска:\n       (пример: 'Gone Girl')",
         )
 
-        show_reviews_page(bot=bot, chat_id=message.chat.id, book_title="Gone Girl")
+        show_reviews_page(
+            bot=bot,
+            chat_id=message.chat.id,
+            # book_title="1Q84",
+            book_title="Gone Girl",
+            force_api=True,
+        )
 
     @bot.callback_query_handler(
         func=lambda call: call.data.startswith(("review_prev:", "review_next:"))
@@ -210,10 +159,19 @@ def setup_main_menu_handlers(bot: TeleBot):
         try:
             direction, page = call.data.split(":")
             page = int(page)
+            cached_data = review_cache.get(call.message.chat.id)
+
+            if not cached_data:
+                bot.answer_callback_query(
+                    call.id, "❌ Данные устарели", show_alert=True
+                )
+
+                return
 
             show_reviews_page(
                 bot=bot,
                 chat_id=call.message.chat.id,
+                book_title=cached_data["book_title"],
                 page=page,
                 message_id=call.message.message_id,
             )
