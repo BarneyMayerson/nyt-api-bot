@@ -1,7 +1,7 @@
 from typing import Optional
 from telebot import TeleBot
 from telebot.types import Message, ReplyKeyboardRemove
-
+from core.constants import MenuButtons, Messages, Errors
 from core.content.genres import genres_menu_message
 from core.content.reviews import reviews_menu_message
 from core.keyboards.main_menu import main_menu_kb
@@ -77,7 +77,7 @@ def show_reviews_page(
         if not api_response.get("results"):
             bot.send_message(
                 chat_id=chat_id,
-                text="😕 Рецензии не найдены. Попробуйте другое название.",
+                text=Messages.REVIEWS_NOT_FOUND,
                 reply_markup=main_menu_kb(),
             )
 
@@ -95,7 +95,7 @@ def show_reviews_page(
         )
         bot.send_message(
             chat_id=chat_id,
-            text="⬇️ Выберите действие ⬇️",
+            text=Messages.SELECT_ACTION,
             reply_markup=main_menu_kb(),
         )
     else:
@@ -110,18 +110,15 @@ def show_reviews_page(
 
 
 def setup_main_menu_handlers(bot: TeleBot):
-    # Список разрешенных текстов
-    allowed_texts = ["📊 Список бестселлеров", "🔍 Поиск рецензий"]
-
-    @bot.message_handler(func=lambda msg: msg.text and msg.text not in allowed_texts)
+    @bot.message_handler(func=lambda msg: msg.text and msg.text not in MenuButtons)
     def preserve_keyboard(message: Message):
         bot.send_message(
             chat_id=message.chat.id,
-            text="⬇️ Пожалуйста, используйте меню ⬇️",
+            text=Messages.USE_MENU,
             reply_markup=main_menu_kb(),
         )
 
-    @bot.message_handler(func=lambda msg: msg.text == "📊 Список бестселлеров")
+    @bot.message_handler(func=lambda msg: msg.text == MenuButtons.BESTSELLERS)
     def handle_bestsellers(message):
         """
         Обрабатывает кнопку со списком бестселлеров.
@@ -146,17 +143,19 @@ def setup_main_menu_handlers(bot: TeleBot):
 
         except Exception:
             bot.answer_callback_query(
-                call.id, "❌ Не удалось загрузить страницу", show_alert=True
+                callback_query_id=call.id,
+                text=Errors.FAILED_TO_LOAD_PAGE,
+                show_alert=True,
             )
 
-    @bot.message_handler(func=lambda msg: msg.text == "🔍 Поиск рецензий")
+    @bot.message_handler(func=lambda msg: msg.text == MenuButtons.REVIEWS)
     def handle_reviews(message: Message):
         """
         Обрабатывает кнопку поиска рецензий.
         """
         bot.send_message(
             chat_id=message.chat.id,
-            text="📖 Введите название книги на английском для поиска\n       или /cancel для отмены. (Пример: 'Gone Girl').",
+            text=Messages.ENTER_BOOK_TITLE,
             reply_markup=ReplyKeyboardRemove(),
         )
 
@@ -166,7 +165,7 @@ def setup_main_menu_handlers(bot: TeleBot):
         if message.text == "/cancel":
             bot.send_message(
                 chat_id=message.chat.id,
-                text="❌ Поиск отменён",
+                text=Errors.SEARCH_CANCELLED,
                 reply_markup=main_menu_kb(),
             )
 
@@ -177,7 +176,7 @@ def setup_main_menu_handlers(bot: TeleBot):
         if not book_title:
             bot.send_message(
                 chat_id=message.chat.id,
-                text="❌ Название не может быть пустым",
+                text=Errors.EMPTY_TITLE_NOT_ALLOWED,
                 reply_markup=main_menu_kb(),
             )
 
@@ -186,7 +185,7 @@ def setup_main_menu_handlers(bot: TeleBot):
         if len(book_title) < 2:
             bot.send_message(
                 chat_id=message.chat.id,
-                text="❌ Слишком короткое название",
+                text=Errors.TITLE_TOO_SHORT,
                 reply_markup=main_menu_kb(),
             )
 
@@ -214,7 +213,9 @@ def setup_main_menu_handlers(bot: TeleBot):
 
             if not cached_data:
                 bot.answer_callback_query(
-                    call.id, "❌ Данные устарели", show_alert=True
+                    callback_query_id=call.id,
+                    text=Errors.DATA_OUT_OF_DATE,
+                    show_alert=True,
                 )
 
                 return
@@ -229,5 +230,7 @@ def setup_main_menu_handlers(bot: TeleBot):
 
         except Exception:
             bot.answer_callback_query(
-                call.id, "❌ Не удалось загрузить страницу REVIEWS", show_alert=True
+                callback_query_id=call.id,
+                text=Errors.FAILED_TO_LOAD_PAGE,
+                show_alert=True,
             )

@@ -3,6 +3,7 @@ from functools import cache
 import time
 import requests
 from config.config import Config
+from core.constants import Errors
 
 
 class NYTAPIError(Exception):
@@ -67,11 +68,11 @@ class NYTBooksAPI:
 
             return response.json()
         except requests.exceptions.HTTPError as http_err:
-            msg = f"Ошибка при обращении к NYT API: {http_err}"
+            msg = f"{Errors.NYT_API_ERROR}: {http_err}"
             raise NYTAPIError(msg) from http_err
 
         except requests.exceptions.Timeout:
-            raise NYTAPIError("Превышено время ожидания ответа от NYT API") from None
+            raise NYTAPIError(Errors.NYT_API_TIMEOUT) from None
 
     def get_bestseller_genres(self, force_refresh: bool = False) -> List[str]:
         """
