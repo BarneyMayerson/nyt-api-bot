@@ -8,7 +8,9 @@ class ReviewCache:
         self._ttl = 3600
 
     def set(self, chat_id: int, book_title: str, reviews: Dict):
-        """Сохраняет книгу и ее рецензии с timestamp"""
+        """
+        Сохраняет книгу и ее рецензии с timestamp.
+        """
         self._storage[chat_id] = {
             "book_title": book_title,
             "reviews": reviews,
@@ -25,7 +27,9 @@ class ReviewCache:
         return None
 
     def get_reviews(self, chat_id: int, book_title: str) -> Optional[List]:
-        """Проверяет совпадение названия книги"""
+        """
+        Проверяет совпадение названия книги.
+        """
         data = self.get(chat_id=chat_id)
 
         if data and data["book_title"] == book_title:

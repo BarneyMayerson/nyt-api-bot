@@ -1,5 +1,6 @@
 from typing import Optional
 from telebot import TeleBot
+from telebot.types import Message
 from core.constants import Errors, MenuButtons
 from core.content.genres import genres_menu_message
 from services.nyt_api import NYTBooksAPI
@@ -38,7 +39,7 @@ def show_genres_page(
 def setup_genres_handlers(bot: TeleBot):
 
     @bot.message_handler(func=lambda msg: msg.text == MenuButtons.BESTSELLERS)
-    def handle_bestsellers(message):
+    def handle_bestsellers(message: Message):
         """
         Обрабатывает кнопку со списком бестселлеров.
         """

@@ -61,7 +61,10 @@ def show_reviews_page(
     if page == 0:
         # Для первой страницы - новое сообщение
         bot.send_message(
-            chat_id=chat_id, text=text, reply_markup=keyboard, parse_mode="HTML"
+            chat_id=chat_id,
+            text=text,
+            reply_markup=keyboard,
+            parse_mode="HTML",
         )
         bot.send_message(
             chat_id=chat_id,

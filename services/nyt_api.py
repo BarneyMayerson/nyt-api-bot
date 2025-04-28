@@ -63,7 +63,7 @@ class NYTBooksAPI:
             params.update(kwargs["params"])
 
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url=url, params=params, timeout=10)
             response.raise_for_status()  # Хорошо бы учесть, что здесь может быть прокинута ошибка
 
             return response.json()
