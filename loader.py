@@ -5,6 +5,7 @@ from handlers.commands.start import bot_start
 from handlers.commands.hello_world import bot_hello_world
 from config.config import Config
 from handlers.main_menu import setup_main_menu_handlers
+from handlers.genres import setup_genres_handler
 from handlers.genre import setup_genre_handler
 
 DEFAULT_COMMANDS: tuple[tuple[str, str], ...] = (
@@ -52,6 +53,7 @@ def setup_handlers(bot: TeleBot) -> None:
     )
 
     setup_main_menu_handlers(bot)
+    setup_genres_handler(bot)
     setup_genre_handler(bot)
 
 
