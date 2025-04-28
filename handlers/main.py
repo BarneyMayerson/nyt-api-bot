@@ -2,10 +2,12 @@ from telebot import TeleBot
 from telebot.types import Message
 from core.constants import MenuButtons, Messages
 from core.keyboards.main_menu import main_menu_kb
-from handlers.genres import show_genres_page
+from handlers.genres import setup_genres_handlers
+from handlers.genre import setup_genre_handlers
+from handlers.reviews import setup_reviews_handlers
 
 
-def setup_main_menu_handlers(bot: TeleBot):
+def setup_all_handlers(bot: TeleBot):
     @bot.message_handler(func=lambda msg: msg.text and msg.text not in MenuButtons)
     def preserve_keyboard(message: Message):
         bot.send_message(
@@ -14,9 +16,6 @@ def setup_main_menu_handlers(bot: TeleBot):
             reply_markup=main_menu_kb(),
         )
 
-    @bot.message_handler(func=lambda msg: msg.text == MenuButtons.BESTSELLERS)
-    def handle_bestsellers(message):
-        """
-        Обрабатывает кнопку со списком бестселлеров.
-        """
-        show_genres_page(bot=bot, chat_id=message.chat.id)
+    setup_genres_handlers(bot=bot)
+    setup_genre_handlers(bot=bot)
+    setup_reviews_handlers(bot=bot)

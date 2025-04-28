@@ -4,10 +4,8 @@ from handlers.commands.help import bot_help
 from handlers.commands.start import bot_start
 from handlers.commands.hello_world import bot_hello_world
 from config.config import Config
-from handlers.main_menu import setup_main_menu_handlers
-from handlers.genres import setup_genres_handlers
-from handlers.genre import setup_genre_handlers
-from handlers.reviews import setup_reviews_handlers
+from handlers.main import setup_all_handlers
+
 
 DEFAULT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("start", "Запуск бота"),
@@ -58,10 +56,7 @@ def setup_handlers(bot: TeleBot) -> None:
         lambda message: bot_hello_world(bot=bot, message=message)
     )
 
-    setup_main_menu_handlers(bot=bot)
-    setup_genres_handlers(bot=bot)
-    setup_genre_handlers(bot=bot)
-    setup_reviews_handlers(bot=bot)
+    setup_all_handlers(bot=bot)
 
 
 def create_bot() -> TeleBot:
