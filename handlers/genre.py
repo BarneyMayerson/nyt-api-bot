@@ -5,7 +5,7 @@ from core.content.books_top import books_top_message
 api = NYTBooksAPI()
 
 
-def setup_genre_handler(bot: TeleBot):
+def setup_genre_handlers(bot: TeleBot):
     @bot.callback_query_handler(func=lambda call: call.data.startswith("genre:"))
     def handle_genre_selection(call):
         """

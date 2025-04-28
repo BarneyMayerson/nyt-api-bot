@@ -35,7 +35,7 @@ def show_genres_page(
         )
 
 
-def setup_genres_handler(bot: TeleBot):
+def setup_genres_handlers(bot: TeleBot):
     @bot.callback_query_handler(func=lambda call: call.data.startswith("genres_page:"))
     def handle_genres_pagination(call):
         """
