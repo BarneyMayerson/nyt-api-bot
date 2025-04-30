@@ -4,6 +4,7 @@ import time
 import requests
 from config.config import Config
 from core.constants import Errors
+from services.cache import review_cache
 
 
 class NYTAPIError(Exception):
@@ -68,10 +69,12 @@ class NYTBooksAPI:
 
             return response.json()
         except requests.exceptions.HTTPError as http_err:
+            review_cache.invalidate()
             msg = f"{Errors.NYT_API_ERROR}: {http_err}"
             raise NYTAPIError(msg) from http_err
 
         except requests.exceptions.Timeout:
+            review_cache.invalidate()
             raise NYTAPIError(Errors.NYT_API_TIMEOUT) from None
 
     def get_bestseller_genres(self, force_refresh: bool = False) -> List[str]:

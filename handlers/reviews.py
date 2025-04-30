@@ -4,11 +4,10 @@ from telebot.types import Message, ReplyKeyboardRemove
 from core.constants import Errors, Messages, MenuButtons
 from core.content.reviews import reviews_menu_message
 from core.keyboards.main_menu import main_menu_kb
-from services.cache import ReviewCache
+from services.cache import review_cache
 from services.nyt_api import NYTBooksAPI
 
 api = NYTBooksAPI()
-review_cache = ReviewCache()
 user_search_queries = {}
 
 
@@ -164,6 +163,7 @@ def setup_reviews_handlers(bot: TeleBot):
             )
 
         except Exception:
+            review_cache.invalidate(chat_id=call.message.chat.id)
             bot.answer_callback_query(
                 callback_query_id=call.id,
                 text=Errors.FAILED_TO_LOAD_PAGE,
