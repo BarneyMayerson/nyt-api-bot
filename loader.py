@@ -4,8 +4,8 @@ from handlers.commands.help import bot_help
 from handlers.commands.start import bot_start
 from handlers.commands.hello_world import bot_hello_world
 from config.config import Config
-from handlers.main_menu import setup_main_menu_handlers
-from handlers.genre import setup_genre_handler
+from handlers.main import setup_all_handlers
+
 
 DEFAULT_COMMANDS: tuple[tuple[str, str], ...] = (
     ("start", "Запуск бота"),
@@ -43,16 +43,20 @@ def setup_handlers(bot: TeleBot) -> None:
     """
     bot.message_handler(commands=["help"])(
         lambda message: bot_help(
-            bot, message, DEFAULT_COMMANDS, "Дополнительный текст описания команд"
+            bot=bot,
+            message=message,
+            commands=DEFAULT_COMMANDS,
+            additional_text="Дополнительный текст описания команд",
         )
     )
-    bot.message_handler(commands=["start"])(lambda message: bot_start(bot, message))
+    bot.message_handler(commands=["start"])(
+        lambda message: bot_start(bot=bot, message=message)
+    )
     bot.message_handler(commands=["hello_world", "hello-world"])(
-        lambda message: bot_hello_world(bot, message)
+        lambda message: bot_hello_world(bot=bot, message=message)
     )
 
-    setup_main_menu_handlers(bot)
-    setup_genre_handler(bot)
+    setup_all_handlers(bot=bot)
 
 
 def create_bot() -> TeleBot:
@@ -69,8 +73,8 @@ def create_bot() -> TeleBot:
         4. Устанавливает команды меню
     """
     Config.validate()
-    bot = TeleBot(Config.TELEGRAM_TOKEN)
-    setup_handlers(bot)
-    set_default_commands(bot)
+    bot = TeleBot(token=Config.TELEGRAM_TOKEN)
+    setup_handlers(bot=bot)
+    set_default_commands(bot=bot)
 
     return bot

@@ -1,4 +1,5 @@
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+from core.constants import MenuButtons
 
 
 def main_menu_kb() -> ReplyKeyboardMarkup:
@@ -16,8 +17,8 @@ def main_menu_kb() -> ReplyKeyboardMarkup:
         one_time_keyboard=False,  # Не скрывает клавиатуру после нажатия
     )
     keyboard.add(
-        KeyboardButton(text="📊 Список бестселлеров"),
-        KeyboardButton(text="🔍 Поиск рецензий"),
+        KeyboardButton(text=MenuButtons.BESTSELLERS),
+        KeyboardButton(text=MenuButtons.REVIEWS),
     )
 
     return keyboard

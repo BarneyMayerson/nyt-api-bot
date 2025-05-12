@@ -1,5 +1,7 @@
 from typing import Optional
 from telebot import TeleBot
+from telebot.types import Message
+from core.constants import Errors, MenuButtons
 from core.content.genres import genres_menu_message
 from services.nyt_api import NYTBooksAPI
 
@@ -34,9 +36,10 @@ def show_genres_page(
         )
 
 
-def setup_main_menu_handlers(bot: TeleBot):
-    @bot.message_handler(func=lambda msg: msg.text == "📊 Список бестселлеров")
-    def handle_bestsellers(message):
+def setup_genres_handlers(bot: TeleBot):
+
+    @bot.message_handler(func=lambda msg: msg.text == MenuButtons.BESTSELLERS)
+    def handle_bestsellers(message: Message):
         """
         Обрабатывает кнопку со списком бестселлеров.
         """
@@ -60,9 +63,7 @@ def setup_main_menu_handlers(bot: TeleBot):
 
         except Exception:
             bot.answer_callback_query(
-                call.id, "❌ Не удалось загрузить страницу", show_alert=True
+                callback_query_id=call.id,
+                text=Errors.FAILED_TO_LOAD_PAGE,
+                show_alert=True,
             )
-
-    @bot.message_handler(func=lambda msg: msg.text == "🔍 Поиск рецензий")
-    def handle_reviews(message):
-        bot.send_message(message.chat.id, "Введите название книги для поиска рецензий:")
